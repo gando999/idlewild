@@ -11,7 +11,7 @@ keywords = (
 
 tokens = keywords + (
     'ID', 'COLON', 'BANG', 'STRING', 'INT', 'LSQUARE', 'RSQUARE',
-    'LBRACE', 'RBRACE', 'COMMA'
+    'LBRACE', 'RBRACE', 'COMMA', 'LPAREN', 'RPAREN',
 )
 
 t_ignore = ' \t\n'
@@ -23,6 +23,8 @@ t_LSQUARE = r'\['
 t_RSQUARE= r'\]'
 t_LBRACE = r'\{'
 t_RBRACE = r'\}'
+t_LPAREN = r'\('
+t_RPAREN = r'\)'
 
 
 def t_INT(t):
@@ -141,10 +143,13 @@ def p_field_decl(p):
 
 def p_gql_type(p):
     '''gql_type : LSQUARE gql_target_type RSQUARE
+                | LSQUARE gql_target_type RSQUARE BANG
                 | gql_target_type
     '''
     if len(p) == 2:
         p[0] = ('GRAPHQL_ATOM', p[1])
+    elif len(p) == 5:
+        p[0] = ('GRAPHQL_NON-NULLABLE_LIST', p[2])
     else:
         # its a list type
         p[0] = ('GRAPHQL_LIST', p[2])
@@ -182,7 +187,7 @@ type Post implements Item {
   id: String!
   title: String
   publishedAt: DateTime
-  blog: [Blog]
+  blog: [Blog]!
   likes: [Like!]
 }
 type Blog {
@@ -190,6 +195,11 @@ type Blog {
   name: String!
   description: String
   posts: [Post!]
+}
+type QueryType {
+    hero(episode: Episode): Character
+    human(id : String) : Human
+    droid(id: ID!): Droid
 }
 interface Item {
   title: String!
