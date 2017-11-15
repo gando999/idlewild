@@ -113,8 +113,7 @@ class Builder:
         if is_list == 'GRAPHQL_LIST':
             base_type = GraphQLList(base_type)
         if is_list == 'GRAPHQL_NON-NULLABLE-LIST':
-            base_type = GraphQLList(base_type)
-            base_type = GraphQLNonNull(base_type)
+            base_type = GraphQLNonNull(GraphQLList(base_type))
             
         return base_type
 
