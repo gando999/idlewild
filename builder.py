@@ -1,4 +1,4 @@
-from collections import OrderedDict, deque
+from collections import OrderedDict
 
 from graphql import (
     graphql,
@@ -46,24 +46,14 @@ class Builder:
         self.schema = None
 
     def build(self, items):
-        work_queue = deque(items)
-        unregistered = set()
-        while True:
-            try:
-                item = work_queue.popleft()
+        root = None  # root has to be last
+        for item in items:
+            item_id, *_ = item
+            if item_id == 'SCHEMADEF':
+                root = item
+            else:
                 self.eval(item)
-            except IndexError:
-                print('Mappings complete')
-                break
-            except UnregisteredError:
-                _, type_name, *_ = item
-                # Avoid cycling endlessly if linear pass fails
-                #if type_name in unregistered:
-                #    raise SchemaMappingsInvalid(
-                #        '{} is not correctly mapped'.format(type_name)
-                #    )
-                unregistered.add(type_name)
-                work_queue.append(item)
+        self.eval(root)
 
     def eval(self, item):
         item_id, *_ = item
@@ -101,8 +91,10 @@ class Builder:
             **GRAPHQL_SCALARS,
             **self.types,
             **self.interfaces,
+            **self.enums,
             **self.interfaces}.get(type_ref)
         if base_type is None:
+            print('Could not resolve {}'.format(type_ref))
             raise UnregisteredError
         return base_type
 
@@ -163,7 +155,6 @@ class Builder:
             _, root_item_info = root_type_info
             _, root_name = root_type_info
             _, _, root_target = root_name
-            typ = self._resolve_base_type(root_target)
             self.schema = GraphQLSchema(
                 query=self._resolve_base_type(root_target)
             )
