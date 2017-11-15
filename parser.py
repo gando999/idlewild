@@ -193,9 +193,9 @@ def p_error(p):
 parser = yacc.yacc(write_tables=DEBUG_TABLES)
 
 
-def parse(data, debug=0):
+def parse(data):
     parser.error = 0
-    p = parser.parse(data, debug=debug)
+    p = parser.parse(data, debug=DEBUG_STATUS)
     if parser.error:
         return None
     return p
