@@ -10,7 +10,7 @@ keywords = (
 )
 
 tokens = keywords + (
-    'ID', 'COLON', 'BANG', 'STRING', 'INT', 'LSQUARE', 'RSQUARE',
+    'ID', 'COLON', 'BANG', 'LSQUARE', 'RSQUARE',
     'LBRACE', 'RBRACE', 'COMMA', 'LPAREN', 'RPAREN',
 )
 
@@ -25,18 +25,6 @@ t_LBRACE = r'\{'
 t_RBRACE = r'\}'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
-
-
-def t_INT(t):
-    r'\d+'
-    t.value = int(t.value)
-    return t
-
-
-def t_STRING(t):
-    r"'([^\\']+|\\'|\\\\)*'"
-    t.value = t.value[1:-1]
-    return t
 
 
 def t_error(t):
