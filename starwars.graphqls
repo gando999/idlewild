@@ -8,7 +8,6 @@ type QueryType {
     droid(id: ID!): Droid
 }
 
-
 enum Episode {
     NEWHOPE
     EMPIRE

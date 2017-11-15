@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from collections import OrderedDict, deque
 
 from graphql import (
     graphql,
@@ -7,21 +7,35 @@ from graphql import (
     GraphQLField,
     GraphQLString,
     GraphQLEnumType,
+    GraphQLInt,
+    GraphQLFloat,
+    GraphQLBoolean,
+    GraphQLID,
+    GraphQLNonNull,
+    GraphQLList,
 )
 
-from graphql.type.definition import GraphQLEnumValue
+from graphql.type.definition import (
+    GraphQLEnumValue,
+    GraphQLInterfaceType,
+)
 
-#schema = GraphQLSchema(
-#  query= GraphQLObjectType(
-#    name='RootQueryType',
-#    fields={
-#      'hello': GraphQLField(
-#        type= GraphQLString,
-#        resolver=lambda *_: 'world'
-#      )
-#    }
-#  )
-#)
+GRAPHQL_SCALARS = {
+    'Int': GraphQLInt,
+    'Float': GraphQLFloat,
+    'String': GraphQLString,
+    'Boolean': GraphQLBoolean,
+    'ID': GraphQLID
+}
+
+
+class UnregisteredError(Exception):
+    pass
+
+
+class SchemaMappingsInvalid(Exception):
+    pass
+
 
 class Builder:
 
@@ -29,10 +43,27 @@ class Builder:
         self.types = {}
         self.enums = {}
         self.interfaces = {}
+        self.schema = None
 
     def build(self, items):
-        for item in items:
-            self.eval(item)
+        work_queue = deque(items)
+        unregistered = set()
+        while True:
+            try:
+                item = work_queue.popleft()
+                self.eval(item)
+            except IndexError:
+                print('Mappings complete')
+                break
+            except UnregisteredError:
+                _, type_name, *_ = item
+                # Avoid cycling endlessly if linear pass fails
+                #if type_name in unregistered:
+                #    raise SchemaMappingsInvalid(
+                #        '{} is not correctly mapped'.format(type_name)
+                #    )
+                unregistered.add(type_name)
+                work_queue.append(item)
 
     def eval(self, item):
         item_id, *_ = item
@@ -63,20 +94,77 @@ class Builder:
         )
 
         self.enums[enum_name] = enum
-        print('Registered ENUM {}'.format(enum))
+        print('Registered ENUM {}'.format(enum_name))
+
+    def _resolve_base_type(self, type_ref):
+        base_type = {
+            **GRAPHQL_SCALARS,
+            **self.types,
+            **self.interfaces,
+            **self.interfaces}.get(type_ref)
+        if base_type is None:
+            raise UnregisteredError
+        return base_type
+
+    def _build_field_type(self, field_type_info):
+        is_list, type_info = field_type_info
+        _, is_nullable, type_ref = type_info
+
+        base_type = self._resolve_base_type(type_ref)
+        
+        if is_nullable == 'NON-NULLABLE':
+            base_type = GraphQLNonNull(base_type)
+        if is_list == 'GRAPHQL_LIST':
+            base_type = GraphQLList(base_type)
+        if is_list == 'GRAPHQL_NON-NULLABLE-LIST':
+            base_type = GraphQLList(base_type)
+            base_type = GraphQLNonNull(base_type)
+            
+        return base_type
+
+    def _build_fields(self, fields):
+        target_fields = []
+        for field in fields:
+            name_and_args, field_type_info = field
+            _, name, *_ = name_and_args  #TODO: args
+            target_fields.append(
+                (name, GraphQLField(
+                    self._build_field_type(field_type_info))
+                 ))
+        return dict(target_fields)
 
     def register_interface(self, item):
-        _, interface_name, interface_fields = item 
+        _, interface_name, interface_fields = item
 
-        #for field in interface_fields:
-        #    self._build_field(field)
-
-        #interface = GraphQLInterfaceType(
-        #    name=interface_name
+        interface = GraphQLInterfaceType(
+            name=interface_name,
+            fields = lambda: dict(self._build_fields(interface_fields)),
+            resolve_type=lambda: None  #TODO: fix this
+        )
+        
+        self.interfaces[interface_name] = interface
         print('Registered INTERFACE {}'.format(interface_name))
 
     def register_type(self, item):
-        print('Got TYPE')
+        _, type_name, implements, field_list = item
+        
+        target_type = GraphQLObjectType(
+            name=type_name,
+            fields=lambda: self._build_fields(field_list),
+            interfaces=lambda: (self._resolve_base_type(implements),) if implements else None
+        )
+        self.types[type_name] = target_type
+        print('Registered TYPE {}'.format(type_name))
 
     def register_schemadef(self, item):
-        print('Got SCHEMADEF')
+        _, _, definition_list = item
+        for definition in definition_list:
+            root_id_info, root_type_info = definition
+            _, root_item_info = root_type_info
+            _, root_name = root_type_info
+            _, _, root_target = root_name
+            typ = self._resolve_base_type(root_target)
+            self.schema = GraphQLSchema(
+                query=self._resolve_base_type(root_target)
+            )
+        print('Created root schema')

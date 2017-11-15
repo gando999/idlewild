@@ -75,7 +75,7 @@ def p_schema_base_elems(p):
 def p_schema_def_element(p):
     '''schema_def_element : SCHEMA schema_type_element_def
     '''
-    p[0] = ('SCHEMADEF', p[2])
+    p[0] = ('SCHEMADEF', 'schema', p[2])
     
 
 def p_schema_type_element(p):
@@ -85,7 +85,7 @@ def p_schema_type_element(p):
     if len(p) == 6:
         p[0] = ('TYPE', p[2], p[4], p[5])
     else:
-        p[0] = ('TYPE', None, p[2], p[3])
+        p[0] = ('TYPE', p[2], None, p[3])
 
 
 def p_scheme_type_element_def(p):
