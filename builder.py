@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import logging
 
 from graphql import (
     graphql,
@@ -27,6 +28,9 @@ GRAPHQL_SCALARS = {
     'Boolean': GraphQLBoolean,
     'ID': GraphQLID
 }
+
+
+LOGGER = logging.getLogger("idlewild")
 
 
 class UnregisteredError(Exception):
@@ -84,7 +88,7 @@ class Builder:
         )
 
         self.enums[enum_name] = enum
-        print('Registered ENUM {}'.format(enum_name))
+        LOGGER.info('Registered ENUM {}'.format(enum_name))
 
     def _resolve_base_type(self, type_ref):
         base_type = {
@@ -94,7 +98,7 @@ class Builder:
             **self.enums,
             **self.interfaces}.get(type_ref)
         if base_type is None:
-            print('Could not resolve {}'.format(type_ref))
+            LOGGER.error('Could not resolve {}'.format(type_ref))
             raise UnregisteredError
         return base_type
 
@@ -135,7 +139,7 @@ class Builder:
         )
         
         self.interfaces[interface_name] = interface
-        print('Registered INTERFACE {}'.format(interface_name))
+        LOGGER.info('Registered INTERFACE {}'.format(interface_name))
 
     def register_type(self, item):
         _, type_name, implements, field_list = item
@@ -146,7 +150,7 @@ class Builder:
             interfaces=lambda: (self._resolve_base_type(implements),) if implements else None
         )
         self.types[type_name] = target_type
-        print('Registered TYPE {}'.format(type_name))
+        LOGGER.info('Registered TYPE {}'.format(type_name))
 
     def register_schemadef(self, item):
         _, _, definition_list = item
@@ -158,4 +162,4 @@ class Builder:
             self.schema = GraphQLSchema(
                 query=self._resolve_base_type(root_target)
             )
-        print('Created root schema')
+        LOGGER.info('Created root schema')
