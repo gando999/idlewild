@@ -36,8 +36,11 @@ if len(sys.argv) == 2:
             ))
             builder = Builder()
             LOGGER.info('Starting build')
+            start_build = time.time()
             builder.build(nodes)
-            LOGGER.info('Build complete')
+            LOGGER.info('Schema built in [{}] ms'.format(
+                (time.time()-start) / 3600
+            ))
             schema = builder.schema
             if schema is not None:
                 print(schema)
