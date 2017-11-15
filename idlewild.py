@@ -1,8 +1,12 @@
+import time
 import logging
 import sys
 
 import parser
 from builder import Builder
+
+
+LOGGER = logging.getLogger("idlewild")
 
 
 def setup_logging(logfile_name=None):
@@ -24,14 +28,21 @@ if len(sys.argv) == 2:
     with open(sys.argv[1]) as f:
         data = f.read()
         try:
+            LOGGER.info('Starting parsing')
+            start = time.time()
             nodes = parser.parse(data)
+            LOGGER.info('Parsing complete in [{}] ms'.format(
+                (time.time()-start) / 3600
+            ))
             builder = Builder()
+            LOGGER.info('Starting build')
             builder.build(nodes)
+            LOGGER.info('Build complete')
             schema = builder.schema
             if schema is not None:
                 print(schema)
         except SyntaxError as se:
-            print('Parse Error: {0}'.format(se))
+            LOGGING.error('Parse Error: {0}'.format(se))
 else:
     print('Usage: idlewild [idl-file]')
     raise SystemExit

@@ -146,13 +146,16 @@ class Builder:
         target_type = GraphQLObjectType(
             name=type_name,
             fields=lambda: self._build_fields(field_list),
-            interfaces=lambda: (self._resolve_base_type(implements),) if implements else None
+            interfaces=lambda: (
+                (self._resolve_base_type(implements),)
+                if implements else None
+             )
         )
         self.types[type_name] = target_type
         LOGGER.info('Registered TYPE {}'.format(type_name))
 
     def register_schemadef(self, item):
-        _, _, definition_list = item
+        _, _, definition_list = item  #TODO: tidy this
         for definition in definition_list:
             root_id_info, root_type_info = definition
             _, root_item_info = root_type_info
