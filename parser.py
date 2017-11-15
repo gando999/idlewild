@@ -1,7 +1,8 @@
 import ply.lex as lex
 
-DEBUG_STATUS = False
-DEBUG_TABLES = False
+DEBUG_STATUS = False  # show the low level LALR debug
+PARSER_OUT = True  # produce the parser.out for debug
+DEBUG_TABLES = False  # show the parsing tables
 
 OPTIMIZE = False
 
@@ -32,7 +33,7 @@ def t_error(t):
     print("Skipping", repr(t.value[0]))
     t.lexer.skip(1)
 
-    
+
 def t_ID(t):
     r'[A-Za-z_][\w_]*'
     t.type = reserved_map.get(t.value, 'ID')
@@ -190,7 +191,9 @@ def p_error(p):
         print('Syntax Error on {0}'.format(p))
 
         
-parser = yacc.yacc(write_tables=DEBUG_TABLES)
+parser = yacc.yacc(
+    write_tables=DEBUG_TABLES, debug=PARSER_OUT
+)
 
 
 def parse(data):
