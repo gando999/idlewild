@@ -6,7 +6,7 @@ DEBUG_TABLES = False
 OPTIMIZE = False
 
 keywords = (
-    'TYPE', 'ENUM', 'IMPLEMENTS', 'INTERFACE',
+    'TYPE', 'ENUM', 'IMPLEMENTS', 'INTERFACE', 'SCHEMA',
 )
 
 tokens = keywords + (
@@ -78,9 +78,16 @@ def p_schema_base_elems(p):
     '''schema_base_elems : schema_type_element
                          | schema_enum_element
                          | schema_interface_element
+                         | schema_def_element
     '''
     p[0] = p[1]
 
+
+def p_schema_def_element(p):
+    '''schema_def_element : SCHEMA schema_type_element_def
+    '''
+    p[0] = ('SCHEMADEF', p[2])
+    
 
 def p_schema_type_element(p):
     '''schema_type_element : TYPE ID schema_type_element_def
@@ -207,6 +214,9 @@ def parse(data, debug=0):
 
 
 code_sample_basic = """
+schema {
+  query: QueryType
+}
 type Post implements Item {
   id: String!
   title: String
