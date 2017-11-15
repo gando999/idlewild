@@ -99,7 +99,7 @@ def p_scheme_type_element_def(p):
 
 
 def p_schema_enum_element(p):
-    '''schema_enum_element : ENUM ID LBRACE id_list RBRACE
+    '''schema_enum_element : ENUM ID LBRACE id_list_no_comma RBRACE
     '''
     p[0] = ('ENUM', p[2], p[4])
 
@@ -110,17 +110,17 @@ def p_schema_interface_element(p):
     p[0] = ('INTERFACE', p[2], p[3])
 
 
-def p_schema_id_list(p):
-    ''' id_list : ID
-                | id_list COMMA ID
+def p_id_list_no_comma(p):
+    ''' id_list_no_comma : ID
+                         | id_list_no_comma ID
     '''
     if len(p) == 2:
         p[0] = [p[1]]
     else:
         if isinstance(p[1], list):
-            p[0] = p[1] + [p[3]]
+            p[0] = p[1] + [p[2]]
         else:
-            p[0] = [p[1], p[3]]
+            p[0] = [p[1], p[2]]
 
 
 def p_field_decl_list(p):
@@ -137,8 +137,32 @@ def p_field_decl_list(p):
 
 
 def p_field_decl(p):
-    '''field_decl : ID COLON gql_type'''
+    '''field_decl : field_name_decl COLON gql_type'''
     p[0] = (p[1], p[3])
+
+
+def p_field_decl_comma_list(p):
+    ''' field_decl_comma_list : field_decl
+                              | field_decl_comma_list COMMA field_decl
+    '''
+    if len(p) == 2:
+        p[0] = [p[1]]
+    else:
+        if isinstance(p[1], list):
+            p[0] = p[1] + [p[3]]
+        else:
+            p[0] = [p[1], p[3]]
+
+
+
+def p_field_name_decl(p):
+    '''field_name_decl : ID
+                       | ID LPAREN field_decl_comma_list RPAREN
+    '''
+    if len(p) == 2:
+        p[0] = ('FIELD', p[1], 'ARGS', [])
+    else:
+        p[0] = ('FIELD', p[1], 'ARGS', p[3])
 
 
 def p_gql_type(p):
@@ -190,26 +214,26 @@ type Post implements Item {
   blog: [Blog]!
   likes: [Like!]
 }
+type QueryType {
+    hero(episode: Episode): Character
+    human(id : String) : Human
+    droid(id: ID!): Droid
+}
 type Blog {
   id: String!
   name: String!
   description: String
   posts: [Post!]
 }
-type QueryType {
-    hero(episode: Episode): Character
-    human(id : String) : Human
-    droid(id: ID!): Droid
-}
 interface Item {
   title: String!
 }
 enum Category {
-  PROGRAMMING_LANGUAGES,
+  PROGRAMMING_LANGUAGES
   API_DESIGN
 }
 enum Category2 {
-  PROGRAMMING_LANGUAGES2,
+  PROGRAMMING_LANGUAGES2
   API_DESIGN2
  }
 """
