@@ -1,10 +1,6 @@
 from setuptools import setup
 
 
-def readme():
-    with open('README.md') as f:
-        return f.read()
-
 setup(
     name='idlewild',
     version='0.1.0',
@@ -13,7 +9,6 @@ setup(
     author_email='gary.anders@gmail.com',
     url='http://github.com/gando999/idlewild/',
     description='GraphQL IDL Parser',
-    long_description=readme(),
     install_requires=[
         'ply==3.10',
         'pyparsing==2.0.3',
