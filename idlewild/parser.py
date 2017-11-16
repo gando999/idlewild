@@ -21,7 +21,7 @@ t_COMMA = r'\,'
 t_COLON = r'\:'
 t_BANG = r'\!'
 t_LSQUARE = r'\['
-t_RSQUARE= r'\]'
+t_RSQUARE = r'\]'
 t_LBRACE = r'\{'
 t_RBRACE = r'\}'
 t_LPAREN = r'\('
@@ -40,7 +40,7 @@ def t_ID(t):
     return t
 
 
-reserved_map = { }
+reserved_map = {}
 for r in keywords:
     reserved_map[r.lower()] = r
 
@@ -76,7 +76,7 @@ def p_schema_def_element(p):
     '''schema_def_element : SCHEMA schema_type_element_def
     '''
     p[0] = ('SCHEMADEF', 'schema', p[2])
-    
+
 
 def p_schema_type_element(p):
     '''schema_type_element : TYPE ID schema_type_element_def
@@ -150,7 +150,6 @@ def p_field_decl_comma_list(p):
             p[0] = [p[1], p[3]]
 
 
-
 def p_field_name_decl(p):
     '''field_name_decl : ID
                        | ID LPAREN field_decl_comma_list RPAREN
@@ -178,7 +177,7 @@ def p_gql_type(p):
 def p_gql_target_type(p):
     '''gql_target_type : ID BANG
                        | ID'''
-    if len(p ) == 3:
+    if len(p) == 3:
         p[0] = ('GRAPHQL_TYPE', 'NON-NULLABLE', p[1])
     else:
         p[0] = ('GRAPHQL_TYPE', 'NULLABLE', p[1])
@@ -190,7 +189,7 @@ def p_error(p):
     else:
         print('Syntax Error on {0}'.format(p))
 
-        
+
 parser = yacc.yacc(
     write_tables=DEBUG_TABLES, debug=PARSER_OUT
 )

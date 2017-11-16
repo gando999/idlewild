@@ -33,7 +33,7 @@ def parse_idl(idl):
         ))
         return nodes
     except SyntaxError as se:
-        LOGGING.error('Parse Error: {0}'.format(se))
+        LOGGER.error('Parse Error: {0}'.format(se))
 
 
 def build_idl_schema(nodes, resolver_mappings=None):

@@ -2,7 +2,6 @@ from collections import OrderedDict
 import logging
 
 from graphql import (
-    graphql,
     GraphQLSchema,
     GraphQLObjectType,
     GraphQLField,
@@ -79,13 +78,13 @@ class Builder:
 
     def register_enum(self, item):
         _, enum_name, enum_values = item
-        
+
         def create_values(enum_values):
             value_dict = OrderedDict()
             for count, name in list(enumerate(enum_values)):
                 value_dict[name] = GraphQLEnumValue(count)
             return value_dict
-        
+
         enum = GraphQLEnumType(
             name=enum_name,
             values=create_values(enum_values)
@@ -111,14 +110,14 @@ class Builder:
         _, is_nullable, type_ref = type_info
 
         base_type = self._resolve_base_type(type_ref)
-        
+
         if is_nullable == 'NON-NULLABLE':
             base_type = GraphQLNonNull(base_type)
         if is_list == 'GRAPHQL_LIST':
             base_type = GraphQLList(base_type)
         if is_list == 'GRAPHQL_NON-NULLABLE-LIST':
             base_type = GraphQLNonNull(GraphQLList(base_type))
-            
+
         return base_type
 
     def _build_args(self, args_list):
@@ -150,16 +149,16 @@ class Builder:
 
         interface = GraphQLInterfaceType(
             name=interface_name,
-            fields = lambda: dict(self._build_fields(interface_fields)),
-            resolve_type=lambda: None  #TODO: fix this
+            fields=lambda: dict(self._build_fields(interface_fields)),
+            resolve_type=lambda: None  # TODO: fix this
         )
-        
+
         self.interfaces[interface_name] = interface
         LOGGER.info('Registered INTERFACE {}'.format(interface_name))
 
     def register_type(self, item):
         _, type_name, implements, field_list = item
-        
+
         target_type = GraphQLObjectType(
             name=type_name,
             fields=lambda: self._build_fields(field_list),
@@ -172,7 +171,7 @@ class Builder:
         LOGGER.info('Registered TYPE {}'.format(type_name))
 
     def register_schemadef(self, item):
-        _, _, definition_list = item  #TODO: tidy this
+        _, _, definition_list = item  # TODO: tidy this
         for definition in definition_list:
             root_id_info, root_type_info = definition
             _, root_item_info = root_type_info
