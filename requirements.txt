@@ -1,4 +1,0 @@
-ply==3.10
-pyparsing==2.0.3
-wheel==0.24.0
-graphql-core>=2.0

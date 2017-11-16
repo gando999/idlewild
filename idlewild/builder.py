@@ -43,11 +43,14 @@ class SchemaMappingsInvalid(Exception):
 
 class Builder:
 
-    def __init__(self):
+    def __init__(self, resolver_map=None):
         self.types = {}
         self.enums = {}
         self.interfaces = {}
         self.schema = None
+        self.resolver_map = (
+            resolver_map if resolver_map is not None else {}
+        )
 
     def build(self, items):
         root = None  # root has to be last
@@ -121,11 +124,13 @@ class Builder:
         target_fields = []
         for field in fields:
             name_and_args, field_type_info = field
-            _, name, *_ = name_and_args  #TODO: args
+            _, name, *_ = name_and_args  #TODO: args and resolver
             target_fields.append(
                 (name, GraphQLField(
-                    self._build_field_type(field_type_info))
-                 ))
+                    self._build_field_type(field_type_info),
+                    args=None,
+                    resolver=self.resolver_map.get('FIXME'),
+                 )))
         return dict(target_fields)
 
     def register_interface(self, item):
