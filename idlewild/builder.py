@@ -14,6 +14,7 @@ from graphql import (
     GraphQLID,
     GraphQLNonNull,
     GraphQLList,
+    GraphQLArgument,
 )
 
 from graphql.type.definition import (
@@ -120,15 +121,26 @@ class Builder:
             
         return base_type
 
+    def _build_args(self, args_list):
+        target_args = []
+        for arg in args_list:
+            name_and_args, field_type_info = arg
+            _, name, *_ = name_and_args
+            target_args.append(
+                (name, GraphQLArgument(
+                    self._build_field_type(field_type_info)
+                 )))
+        return dict(target_args)
+
     def _build_fields(self, fields):
         target_fields = []
         for field in fields:
             name_and_args, field_type_info = field
-            _, name, *_ = name_and_args  #TODO: args and resolver
+            _, name, _, args_list = name_and_args
             target_fields.append(
                 (name, GraphQLField(
                     self._build_field_type(field_type_info),
-                    args=None,
+                    args=self._build_args(args_list),
                     resolver=self.resolver_map.get('FIXME'),
                  )))
         return dict(target_fields)
