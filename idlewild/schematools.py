@@ -27,7 +27,7 @@ def parse_idl(idl):
     try:
         LOGGER.info('Starting parsing')
         start = time.time()
-        nodes = parser.parse(data)
+        nodes = parser.parse(idl)
         LOGGER.info('Parsing complete in [{}] ms'.format(
             (time.time()-start) / 3600
         ))
@@ -36,8 +36,7 @@ def parse_idl(idl):
         LOGGING.error('Parse Error: {0}'.format(se))
 
 
-def parse_and_build_idl(idl, resolver_mappings=None):
-    nodes = parse_idl(idl)
+def build_idl_schema(nodes, resolver_mappings=None):
     builder = Builder(resolver_mappings)
     LOGGER.info('Starting build')
     start_build = time.time()
@@ -46,15 +45,31 @@ def parse_and_build_idl(idl, resolver_mappings=None):
         (time.time()-start_build) / 3600
     ))
     return builder.schema
-    
 
-if len(sys.argv) == 2:
-    setup_logging()
-    with open(sys.argv[1]) as f:
+
+def parse_and_build_idl(idl, resolver_mappings=None):
+    nodes = parse_idl(idl)
+    return build_idl_schema(nodes, resolver_mappings)
+
+
+def parse_idl_file(filename):
+    LOGGER.info('Loading IDL from {}'.format(filename))
+    with open(filename) as f:
         data = f.read()
-        schema = parse_and_build_idl(data)
-        if schema is not None:
-            print(schema)
-else:
-    print('Usage: idlewild [idl-file]')
-    raise SystemExit
+        return parse_idl(data)
+
+
+def parse_and_build_idl_file(filename, resolver_mappings=None):
+    LOGGER.info('Building schema from {}'.format(filename))
+    nodes = parse_idl_file(filename)
+    return build_idl_schema(nodes, resolver_mappings)
+
+
+if __name__ == '__main__':
+    if len(sys.argv) == 2:
+        setup_logging()
+        schema = parse_and_build_idl_file(sys.argv[1])
+        LOGGER.info('Parsed and validated schema')
+    else:
+        print('Usage: schematools [idl-file]')
+        raise SystemExit
