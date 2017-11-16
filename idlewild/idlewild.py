@@ -23,29 +23,38 @@ def setup_logging(logfile_name=None):
     logger.addHandler(ch)
 
 
+def parse_idl(idl):
+    try:
+        LOGGER.info('Starting parsing')
+        start = time.time()
+        nodes = parser.parse(data)
+        LOGGER.info('Parsing complete in [{}] ms'.format(
+            (time.time()-start) / 3600
+        ))
+        return nodes
+    except SyntaxError as se:
+        LOGGING.error('Parse Error: {0}'.format(se))
+
+
+def parse_and_build_idl(idl, resolver_mappings=None):
+    nodes = parse_idl(idl)
+    builder = Builder(resolver_mappings)
+    LOGGER.info('Starting build')
+    start_build = time.time()
+    builder.build(nodes)
+    LOGGER.info('Schema built in [{}] ms'.format(
+        (time.time()-start_build) / 3600
+    ))
+    return builder.schema
+    
+
 if len(sys.argv) == 2:
     setup_logging()
     with open(sys.argv[1]) as f:
         data = f.read()
-        try:
-            LOGGER.info('Starting parsing')
-            start = time.time()
-            nodes = parser.parse(data)
-            LOGGER.info('Parsing complete in [{}] ms'.format(
-                (time.time()-start) / 3600
-            ))
-            builder = Builder()
-            LOGGER.info('Starting build')
-            start_build = time.time()
-            builder.build(nodes)
-            LOGGER.info('Schema built in [{}] ms'.format(
-                (time.time()-start) / 3600
-            ))
-            schema = builder.schema
-            if schema is not None:
-                print(schema)
-        except SyntaxError as se:
-            LOGGING.error('Parse Error: {0}'.format(se))
+        schema = parse_and_build_idl(data)
+        if schema is not None:
+            print(schema)
 else:
     print('Usage: idlewild [idl-file]')
     raise SystemExit
