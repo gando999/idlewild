@@ -105,10 +105,15 @@ class Builder:
             raise UnregisteredError
         return base_type
 
-    def _build_field_type(self, field_type_info):
+    def _extract_type_info(self, field_type_info):
         is_list, type_info = field_type_info
         _, is_nullable, type_ref = type_info
+        return is_list, is_nullable, type_ref
 
+    def _build_field_type(self, field_type_info):
+        is_list, is_nullable, type_ref = (
+            self._extract_type_info(field_type_info)
+        )
         base_type = self._resolve_base_type(type_ref)
 
         if is_nullable == 'NON-NULLABLE':
@@ -136,11 +141,14 @@ class Builder:
         for field in fields:
             name_and_args, field_type_info = field
             _, name, _, args_list = name_and_args
+            _, _, type_ref = (
+                self._extract_type_info(field_type_info)
+            )
             target_fields.append(
                 (name, GraphQLField(
                     self._build_field_type(field_type_info),
                     args=self._build_args(args_list),
-                    resolver=self.resolver_map.get('FIXME'),
+                    resolver=self.resolver_map.get(type_ref),
                  )))
         return dict(target_fields)
 
