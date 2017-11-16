@@ -2,8 +2,8 @@ import time
 import logging
 import sys
 
-import parser
-from builder import Builder
+import idlewild.parser as parser
+from idlewild.builder import Builder
 
 
 LOGGER = logging.getLogger("idlewild")
