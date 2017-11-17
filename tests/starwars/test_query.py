@@ -329,7 +329,6 @@ def test_check_type_of_r2():
     assert result.data == expected
 
 
-@pytest.mark.xfail
 def test_check_type_of_luke():
     query = '''
         query CheckTypeOfLuke {
