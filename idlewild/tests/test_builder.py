@@ -1,6 +1,7 @@
 import pytest
 
 from graphql import (
+    GraphQLEnumType,
     GraphQLObjectType,
     GraphQLField,
     GraphQLString,
@@ -61,6 +62,14 @@ def type_node(field_query_args, field_atom_nullable_stringtype):
     )
 
 
+@pytest.fixture
+def enum_node():
+    return (
+        'ENUM', 'FooCategory',
+        ['BarThing1', 'BarThing2']
+    )
+
+
 def test_schemadef(
         plain_builder, schemadef_node,
         generic_graphql_object, generic_graphql_field):
@@ -91,3 +100,24 @@ def test_type(
     assert 'QueryType' in types
     query_object = types['QueryType']
     assert query_object.name == 'foo'
+
+
+def test_enum(
+        plain_builder, enum_node,
+        generic_graphql_object, schemadef_node):
+
+    plain_builder.types = {'QueryType': generic_graphql_object}
+    plain_builder.build([schemadef_node, enum_node])
+
+    enums = plain_builder.enums
+
+    assert 'FooCategory' in enums
+    enum_object = enums['FooCategory']
+    assert isinstance(enum_object, GraphQLEnumType)
+
+    values = enum_object.values
+    assert len(values) == 2
+
+    names = [value.name for value in values]
+    assert 'BarThing1' in names
+    assert 'BarThing2' in names
