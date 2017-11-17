@@ -1,6 +1,5 @@
 from graphql import graphql
 from graphql.error import format_error
-import pytest
 
 from .starwars_schema import StarWarsSchema
 

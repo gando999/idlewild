@@ -49,7 +49,7 @@ def field_atom_nullable_stringtype():
 def schemadef_node(field_query_args, field_atom_nullable_querytype):
     return (
         'SCHEMADEF', 'schema',
-        [(field_query_args ,field_atom_nullable_querytype)]
+        [(field_query_args, field_atom_nullable_querytype)]
     )
 
 
@@ -60,35 +60,34 @@ def type_node(field_query_args, field_atom_nullable_stringtype):
         [('FooBar', field_atom_nullable_stringtype)]
     )
 
-            
+
 def test_schemadef(
         plain_builder, schemadef_node,
         generic_graphql_object, generic_graphql_field):
-    
+
     plain_builder.types = {'QueryType': generic_graphql_object}
     plain_builder.build([schemadef_node])
-    
+
     schema = plain_builder.schema
     query_type = schema.get_query_type()
     fields = query_type.fields
-    
+
     assert fields['bar'] == generic_graphql_field
 
 
 def test_type(
         plain_builder, type_node,
-        schemadef_node, generic_graphql_object,
-        field_atom_nullable_stringtype,
-        field_atom_nullable_querytype):
-    
+        schemadef_node, generic_graphql_object):
+
     plain_builder.types = {'QueryType': generic_graphql_object}
     plain_builder.build([schemadef_node, type_node])
 
     types = plain_builder.types
-    
+
     assert 'Foo' in types
-    types['Foo'] == field_atom_nullable_stringtype
+    foo_object = types['Foo']
+    assert foo_object.name == 'Foo'
 
     assert 'QueryType' in types
-    types['QueryType'] == field_atom_nullable_querytype
-    
+    query_object = types['QueryType']
+    assert query_object.name == 'foo'
