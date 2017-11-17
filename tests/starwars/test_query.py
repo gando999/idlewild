@@ -4,6 +4,8 @@ import pytest
 
 from .starwars_schema import StarWarsSchema
 
+# Tests from https://github.com/graphql-python/graphql-core
+
 
 def test_hero_name_query():
     query = '''
