@@ -3,7 +3,7 @@ Idlewild
 
 Use the amazing Python PLY library to parse GraphQL IDL into a schema.
 
-###Purpose
+### Purpose
 
 Idlewild is a Python library for creating GraphQL schemas from GraphQL IDL format. Optionally it also allows you to register data fetchers for fields and these can be implemented in your own application.
 
@@ -18,7 +18,7 @@ As stated on [graphql-core](https://github.com/graphql-python/graphql-core):
 * Examples can be found in [tests](https://github.com/gando999/idlewild/tree/master/tests) in this repository.
 
 
-###Concepts
+### Concepts
 
 
 To build a schema, we need only a schema definition in this [form](http://graphql.org/learn/schema):
