@@ -15,8 +15,8 @@ from .fixtures import (
 setup_logging()
 
 datafetchers = {
-    'human': lambda human, info, **args: get_human(human, args),
-    'droid': lambda droid, info, **args: get_droid(droid, args),
+    'human': lambda human, info, **args: get_human(args['id']),
+    'droid': lambda droid, info, **args: get_droid(args['id']),
     'hero': lambda root, info, **args: get_hero(args.get('episode')),
     'friends': lambda character, *_: get_friends(character),
 }
