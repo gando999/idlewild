@@ -51,7 +51,6 @@ def test_hero_name_and_friends_query():
     assert result.data == expected
 
 
-@pytest.mark.xfail
 def test_nested_query():
     query = '''
         query NestedQuery {
