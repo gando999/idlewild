@@ -1,7 +1,7 @@
 import ply.lex as lex
 
 DEBUG_STATUS = False  # show the low level LALR debug
-PARSER_OUT = True  # produce the parser.out for debug
+PARSER_OUT = False  # produce the parser.out for debug
 DEBUG_TABLES = False  # show the parsing tables
 
 OPTIMIZE = False
