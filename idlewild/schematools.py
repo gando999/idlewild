@@ -36,8 +36,13 @@ def parse_idl(idl):
         LOGGER.error('Parse Error: {0}'.format(se))
 
 
-def build_idl_schema(nodes, resolver_mappings=None):
-    builder = Builder(resolver_mappings)
+def build_idl_schema(
+        nodes,
+        resolver_mappings=None,
+        interface_resolver_mappings=None):
+    builder = Builder(
+        resolver_mappings, interface_resolver_mappings
+    )
     LOGGER.info('Starting build')
     start_build = time.time()
     builder.build(nodes)
@@ -47,9 +52,14 @@ def build_idl_schema(nodes, resolver_mappings=None):
     return builder.schema
 
 
-def parse_and_build_idl(idl, resolver_mappings=None):
+def parse_and_build_idl(
+        idl,
+        resolver_mappings=None,
+        interface_resolver_mappings=None):
     nodes = parse_idl(idl)
-    return build_idl_schema(nodes, resolver_mappings)
+    return build_idl_schema(
+        nodes, resolver_mappings, interface_resolver_mappings
+    )
 
 
 def parse_idl_file(filename):
@@ -59,10 +69,15 @@ def parse_idl_file(filename):
         return parse_idl(data)
 
 
-def parse_and_build_idl_file(filename, resolver_mappings=None):
+def parse_and_build_idl_file(
+        filename,
+        resolver_mappings=None,
+        interface_resolver_mappings=None):
     LOGGER.info('Building schema from {}'.format(filename))
     nodes = parse_idl_file(filename)
-    return build_idl_schema(nodes, resolver_mappings)
+    return build_idl_schema(
+        nodes, resolver_mappings, interface_resolver_mappings
+    )
 
 
 if __name__ == '__main__':

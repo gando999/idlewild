@@ -43,13 +43,20 @@ class SchemaMappingsInvalid(Exception):
 
 class Builder:
 
-    def __init__(self, resolver_map=None):
+    def __init__(
+            self, resolver_map=None,
+            interface_resolver_map=None):
         self.types = {}
         self.enums = {}
         self.interfaces = {}
         self.schema = None
         self.resolver_map = (
-            resolver_map if resolver_map is not None else {}
+            resolver_map
+            if resolver_map is not None else {}
+        )
+        self.interface_resolver_map = (
+            interface_resolver_map
+            if interface_resolver_map is not None else {}
         )
 
     def build(self, items):
@@ -141,14 +148,11 @@ class Builder:
         for field in fields:
             name_and_args, field_type_info = field
             _, name, _, args_list = name_and_args
-            _, _, type_ref = (
-                self._extract_type_info(field_type_info)
-            )
             target_fields.append(
                 (name, GraphQLField(
                     self._build_field_type(field_type_info),
                     args=self._build_args(args_list),
-                    resolver=self.resolver_map.get(type_ref),
+                    resolver=self.resolver_map.get(name),
                  )))
         return dict(target_fields)
 
@@ -158,7 +162,9 @@ class Builder:
         interface = GraphQLInterfaceType(
             name=interface_name,
             fields=lambda: dict(self._build_fields(interface_fields)),
-            resolve_type=lambda: None  # TODO: fix this
+            resolve_type=lambda x, y: self._resolve_base_type(
+                self.interface_resolver_map.get(interface_name)(x, y)
+            )
         )
 
         self.interfaces[interface_name] = interface
