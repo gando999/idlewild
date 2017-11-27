@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='idlewild',
-    version='0.2.0',
+    version='0.4.0',
     packages=['idlewild'],
     author='Gary Anderson',
     author_email='gary.anders@gmail.com',
