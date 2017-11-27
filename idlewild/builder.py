@@ -186,12 +186,18 @@ class Builder:
 
     def register_schemadef(self, item):
         _, _, definition_list = item  # TODO: tidy this
+        query_type_map = {}
         for definition in definition_list:
             root_id_info, root_type_info = definition
+            _, query_type, *_ = root_id_info  # query or mutation
             _, root_item_info = root_type_info
             _, root_name = root_type_info
             _, _, root_target = root_name
-            self.schema = GraphQLSchema(
-                query=self._resolve_base_type(root_target)
+            query_type_map[query_type] = self._resolve_base_type(root_target)
+            LOGGER.info(
+                'Registered ROOT [{}] of {}'.format(query_type, root_target)
             )
-        LOGGER.info('Created root schema')
+        self.schema = GraphQLSchema(
+            **query_type_map
+        )
+        LOGGER.info('Created ROOT schema')
