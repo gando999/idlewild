@@ -1,3 +1,5 @@
+[![PyPI version](https://badge.fury.io/py/idlewild.svg)](https://badge.fury.io/py/idlewild)
+
 Idlewild
 =======
 
