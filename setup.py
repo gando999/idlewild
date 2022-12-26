@@ -12,7 +12,7 @@ setup(
     install_requires=[
         'ply==3.10',
         'pyparsing==2.0.3',
-        'wheel==0.24.0',
+        'wheel==0.38.1',
         'graphql-core>=2.0',
     ],
     classifiers=[
